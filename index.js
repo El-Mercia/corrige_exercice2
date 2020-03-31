@@ -58,7 +58,7 @@ app.route("/api/articles2/delete")
 app.get("/api/articles2", (req, res) => {
     const sqlConnection = mysql.createConnection(sqlConfig);
     
-    sqlConnection.query("SELECT id, title, content, users AS authorfirstname, users.lastname AS authorlastname, created_at" 
+    sqlConnection.query("SELECT id, title, content, users.firstname AS authorFirstname, users.lastname AS authorlastname, created_at" 
     + "FROM node_users" 
     + "LEFT JOIN node_users" 
     + "ON node_articles2.author = node_users.id" 
@@ -67,9 +67,80 @@ app.get("/api/articles2", (req, res) => {
         if (error) {
             console.log("ERROR :", error.code);
         } else {
-            res.send(result);     
+            res.send({
+                status: "ok",
+                comments: result,
+            });   
         }
         sqlConnection.end();
     });
 });   
     
+app.route("/api/comments2/create")
+    .get((req, res) => res.status(503).send({status: "ERROR"}))
+    .post((req, res) => {
+        console.log(req.body);
+
+        const sqlConnection = mysql.createConnection(sqlConfig);
+
+        sqlConnection.query(
+            "INSERT INTO node_comments2 (article_id, author, content) VALUES (?, ?, ?)", 
+            [ req.body.article_id, req.body.author, req.body.content ],
+            (error, result) => {
+                if (error) {
+                    console.log("ERROR :", error.code);
+                    res.status(503).send({ status: "ERROR" });
+                } else {
+                    console.log(result);
+                    res.send({ status: "OK"});
+                }
+                sqlConnection.end();
+            });	
+    });
+
+app.route("/api/comments2/delete")
+    .get((req, res) => res.status(503).send({status: "ERROR"}))
+    .post((req, res) => {
+
+        const sqlConnection = mysql.createConnection(sqlConfig);
+
+        sqlConnection.query(
+            "DELETE FROM node_comments2 WHERE id = ?",
+            [ req.body.id ],
+            (error, result) => {
+                if (error) {
+                    console.log("ERROR :", error.code);
+                    res.status(503).send({ status: "ERROR" });
+                } else {
+                    console.log(result);
+                    res.send({ status: "OK"});
+                }
+                sqlConnection.end();
+            });
+    });	
+
+app.get("/api/comments2", (req, res) => {
+    const sqlConnection = mysql.createConnection(sqlConfig);
+        
+    sqlConnection.query("SELECT articles2_id, title, content, node_users.firstname AS authorFirstname, node_users.lastname AS authorLastname, created_at" 
+        + "FROM node_comments2" 
+        + "LEFT JOIN node_users" 
+        + "ON node_comments2.author = node_users.id"
+        + "WHERE article2_id = ?" 
+        + "ORDER BY created_at DESC"
+        + "LIMIT 5",
+    [ req.query.articles2_id],
+    (error, result) => {
+        if (error) {
+            console.log("ERROR :", error.code);
+        } else {
+            console.log(result);
+            res.send({
+                status: "ok",
+                comments: result,
+            });     
+        }
+        sqlConnection.end();
+    });
+});   
+        
