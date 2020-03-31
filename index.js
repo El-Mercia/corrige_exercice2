@@ -21,7 +21,7 @@ app.route("/api/articles2/create")
         const sqlConnection = mysql.createConnection(sqlConfig);
 
         sqlConnection.query(
-            "INSERT INTO node_articles2 VALUES (NULL, ?, ?, ?, NULL)", 
+            "INSERT INTO node_articles2 (title, content, author) VALUES (?, ?, ?)", 
             [ req.body.title, req.body.content, req.body.author ],
             (error, result) => {
                 if (error) {
@@ -35,15 +35,15 @@ app.route("/api/articles2/create")
             });	
     });
 
-app.route("/api/articles/delete")
+app.route("/api/articles2/delete")
     .get((req, res) => res.status(503).send({status: "ERROR"}))
     .post((req, res) => {
 
         const sqlConnection = mysql.createConnection(sqlConfig);
 
         sqlConnection.query(
-            "DELETE FROM node_articles WHERE id = ?",
-            [ req.body.articlesId ],
+            "DELETE FROM node_articles2 WHERE id = ?",
+            [ req.body.id ],
             (error, result) => {
                 if (error) {
                     console.log("ERROR :", error.code);
@@ -55,14 +55,19 @@ app.route("/api/articles/delete")
                 sqlConnection.end();
             });
     });	
-app.get("/api/articles", (req, res) => {
+app.get("/api/articles2", (req, res) => {
     const sqlConnection = mysql.createConnection(sqlConfig);
     
-    sqlConnection.query("SELECT id, title, content, users AS authorFirstname, users.lastname AS authorLastname, created_at FROM node_articles LIMIT 5 ORDER BY created_at DESC", (error, result) => {
+    sqlConnection.query("SELECT id, title, content, users AS authorfirstname, users.lastname AS authorlastname, created_at" 
+    + "FROM node_users" 
+    + "LEFT JOIN node_users" 
+    + "ON node_articles2.author = node_users.id" 
+    + "ORDER BY created_at DESC"
+    + "LIMIT 5", (error, result) => {
         if (error) {
             console.log("ERROR :", error.code);
         } else {
-            res.send(result [0]);     
+            res.send(result);     
         }
         sqlConnection.end();
     });
