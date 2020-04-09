@@ -16,6 +16,6 @@ CREATE TABLE node_comments2 (
     author INT NOT NULL,
     content TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT FK_comments2_articles_id FOREIGN KEY (articles_id) REFERENCES node_articles2(id),
+    CONSTRAINT FK_comments2_articles_id FOREIGN KEY (articles_id) REFERENCES node_articles2(id) ON DELETE CASCADE,
     CONSTRAINT FK_comments2_author FOREIGN KEY (author) REFERENCES node_users(id)
 )
