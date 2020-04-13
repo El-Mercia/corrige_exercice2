@@ -94,7 +94,7 @@ app.get("/api/article", (req, res) => {
         + "  FROM node_articles"
         + "  LEFT JOIN node_users"
         + "  ON node_articles.author = node_users.id"
-        + " WHERE node_articles.id = ?"
+        + "  WHERE node_articles.id = ?"
         + "  LIMIT 1;",
         [ req.query.id ],
         (error, result) => {
