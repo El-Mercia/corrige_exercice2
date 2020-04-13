@@ -74,8 +74,10 @@ app.get("/api/comments", (req, res) => {
         + "  FROM node_comments"
         + "  LEFT JOIN node_users"
         + "  ON node_comments.author = node_users.id"
+        + "  WHERE article_id = ?"
         + "  ORDER BY created_at DESC"
         + "  LIMIT 5;",
+        [ req.query.id ],
         (error, result) => {
             if (error) {
                 console.log(error.code);
@@ -92,27 +94,3 @@ app.get("/api/comments", (req, res) => {
     );
 });
 
-app.get("/api/comment", (req, res) => {
-    const sqlConnection = mysql.createConnection(sqlConfig);
-    sqlConnection.query(
-        "SELECT node_comments.id, article_id, content, node_users.firstname AS authorFirstname, node_users.lastname AS authorLastname, created_at"
-        + "  FROM node_comments"
-        + "  LEFT JOIN node_users"
-        + "  ON node_comments.author = node_users.id"
-        + "  WHERE node_articles.id = ?"
-        + "  LIMIT 1;",
-        [ req.query.article_id ],
-        (error, result) => {
-            if (error) {
-                res.status(503).send({ status: "ERROR" });
-            } else {
-                console.log(result);
-                res.send({
-                    status: "OK",
-                    comment: result[0],
-                });
-            }
-            sqlConnection.end();
-        }
-    );
-});
